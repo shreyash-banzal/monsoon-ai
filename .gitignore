@@ -1,0 +1,35 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Streamlit config (if you add local sensitive config)
+# Note: Do not ignore app.py or pages directory!
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# VS Code / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# MacOS
+.DS_Store
+
+# Note on Models: 
+# If your .joblib files in the models/ directory are larger than 100MB, 
+# you will need to ignore them and use Git LFS (Large File Storage). 
+# If they are smaller than 100MB, they can be committed safely so Streamlit Cloud can read them.
