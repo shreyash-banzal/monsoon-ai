@@ -252,7 +252,6 @@ with st.sidebar:
         <div style="line-height:1.2;">
             <div style="display:flex; align-items:center; gap:8px;">
                 <b style="font-size:1.1rem; color:white; font-weight:800;">MONSOON-AI</b>
-                <span class="sih-badge">SIH26080</span>
             </div>
             <div style="font-size:0.75rem; color:#94a3b8; font-weight:500;">Regime Aware Rainfall AI</div>
         </div>
@@ -307,15 +306,8 @@ with st.sidebar:
     </div>
     <div style="font-size:0.75rem; color:#0284c7; margin-bottom: 10px; margin-top:2px; font-weight:500;">IMD Physics Rule Engine</div>
     """, unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div style="margin-top:20px; font-size:0.8rem; color:#94a3b8; font-weight:600;">Optional Groq API Key:</div>
-    <div style="background:#0F172A; border:1px solid #1E293B; border-radius:6px; padding:6px 12px; font-family:monospace; color:#475569; font-size:0.8rem; margin-top:4px;">
-        gsk_********************... (Hidden)
-    </div>
-    """, unsafe_allow_html=True)
 
-    st.markdown("<br/><br/><br/>", unsafe_allow_html=True)
+    st.markdown("<br/><br/>", unsafe_allow_html=True)
     st.markdown("""
     <div style="font-size:0.7rem; color:#64748b; margin-top: auto;">
         Runtime <span style="float:right; color:#38BDF8;">Python 3.13</span><br/>
