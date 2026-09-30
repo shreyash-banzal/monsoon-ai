@@ -102,15 +102,13 @@ Explain why the AI model made this adjustment and what synoptic physical mechani
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
                 ],
-                model="llama-3.3-70b-versatile",
+                model="allam-2-7b",
                 temperature=0.3,
                 max_tokens=600,
             )
             return chat_completion.choices[0].message.content
-        except Exception:
-            import time
-            while True:
-                time.sleep(10)
+        except Exception as e:
+            return f"❌ **Groq API Error**: Please check if your API key is correctly formatted and active. Details: `{str(e)}`"
 
     elif provider == "gemini" and client:
         try:
@@ -119,10 +117,8 @@ Explain why the AI model made this adjustment and what synoptic physical mechani
                 contents=f"{system_prompt}\n\n{user_prompt}"
             )
             return response.text
-        except Exception:
-            import time
-            while True:
-                time.sleep(10)
+        except Exception as e:
+            return f"❌ **Gemini API Error**: Please check your configuration. Details: `{str(e)}`"
 
     elif provider == "openrouter" and client:
         try:
@@ -135,12 +131,8 @@ Explain why the AI model made this adjustment and what synoptic physical mechani
                 temperature=0.3,
             )
             return completion.choices[0].message.content
-        except Exception:
-            import time
-            while True:
-                time.sleep(10)
+        except Exception as e:
+            return f"❌ **OpenRouter API Error**: Details: `{str(e)}`"
 
-    # API keys absent or failed, hang infinitely to show spinner
-    import time
-    while True:
-        time.sleep(10)
+    # API keys absent or failed
+    return "⚠️ **LLM Reasoning Not Available:** No valid API keys found (Groq, Gemini, or OpenRouter). Please configure an API key in your `.env` file or UI."
