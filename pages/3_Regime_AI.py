@@ -19,7 +19,7 @@ from utils.llm_explainer import explain_forecast_adjustment, get_llm_client
 
 st.set_page_config(page_title="Regime & AI Explanation | MONSOON-AI", page_icon="🧠", layout="wide")
 
-from utils.ui import apply_custom_theme, render_sidebar
+from utils.ui import apply_custom_theme, render_sidebar, animated_metric, svg_spinner
 apply_custom_theme()
 render_sidebar()
 
@@ -188,15 +188,16 @@ with col_out:
 
     m1, m2, m3 = st.columns(3)
     with m1:
-        st.metric("Raw NWP Forecast", f"{res['raw_nwp']} mm")
+        animated_metric("Raw NWP Forecast", res['raw_nwp'], suffix=" mm")
     with m2:
-        st.metric(
+        animated_metric(
             "AI Corrected Forecast",
-            f"{res['ai_corrected']} mm",
+            res['ai_corrected'],
+            suffix=" mm",
             delta=f"{res['delta_mm']:+} mm"
         )
     with m3:
-        st.metric("Identified Regime", res['regime_name'].split('/')[0], f"Conf: {res['regime_confidence']*100:.0f}%")
+        animated_metric("Identified Regime", res['regime_name'].split('/')[0], delta=f"Conf: {res['regime_confidence']*100:.0f}%")
 
     # Before vs After Radar/Bar Comparison
     fig = go.Figure()
@@ -223,19 +224,22 @@ st.markdown("---")
 st.subheader("🤖 Why AI Changed the Forecast (Powered by LLM)")
 groq_key = st.session_state.get("groq_key", "")
 
-with st.spinner("Generating expert synoptic rationale..."):
-    explanation = explain_forecast_adjustment(
-        regime_name=res['regime_name'],
-        raw_nwp=res['raw_nwp'],
-        ai_corrected=res['ai_corrected'],
-        heavy_rain_prob=res['probabilities']['prob_heavy_64_5'],
-        district_or_region=selected_region,
-        features={"u850": val_u850, "rh700": val_rh700, "mslp_grad": val_mslp},
-        groq_key=groq_key
-    )
+if run_btn:
+    with svg_spinner(root_dir / "animations" / "loading.svg", "Generating expert synoptic rationale..."):
+        explanation = explain_forecast_adjustment(
+            regime_name=res['regime_name'],
+            raw_nwp=res['raw_nwp'],
+            ai_corrected=res['ai_corrected'],
+            heavy_rain_prob=res['probabilities']['prob_heavy_64_5'],
+            district_or_region=selected_region,
+            features={"u850": val_u850, "rh700": val_rh700, "mslp_grad": val_mslp},
+            groq_key=groq_key
+        )
 
-st.markdown(f"""
-<div style="background: #111B2E; border-left: 4px solid #38BDF8; padding: 18px 22px; border-radius: 8px;">
-    {explanation}
-</div>
-""", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background: #111B2E; border-left: 4px solid #38BDF8; padding: 18px 22px; border-radius: 8px;">
+        {explanation}
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.info("Click 'Run AI Pipeline & Generate LLM Explanation' to generate the diagnostic rationale.")

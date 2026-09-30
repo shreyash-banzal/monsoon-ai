@@ -108,6 +108,11 @@ class MonsoonInferenceEngine:
         # If dictionary of models per regime
         if isinstance(self.bias_correctors, dict):
             reg_model = self.bias_correctors.get(regime_id) or self.bias_correctors.get(str(regime_id))
+            
+            # Fallback to global model if specific regime model is not found
+            if reg_model is None and 'global' in self.bias_correctors:
+                reg_model = self.bias_correctors['global']
+                
             if reg_model is not None:
                 val = float(reg_model.predict(X)[0])
                 return max(0.0, round(val, 1))

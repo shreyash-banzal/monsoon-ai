@@ -195,6 +195,37 @@ st.markdown("""
         border-radius: 50%;
         display: inline-block;
     }
+
+    /* --- Smooth Interactions & Transitions --- */
+    /* Apply transitions to built-in Streamlit components and custom cards */
+    .stButton > button, 
+    .stTabs [data-baseweb="tab"], 
+    [data-testid="stSidebar"], 
+    [data-testid="stMetric"], 
+    [data-baseweb="select"], 
+    .stSlider,
+    .kpi-card,
+    .station-panel {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    /* Hover states for buttons and cards (subtle lift + soft shadow increase) */
+    .stButton > button:hover, 
+    [data-testid="stMetric"]:hover,
+    .kpi-card:hover,
+    .station-panel:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Rerun Fade-In Animation */
+    @keyframes softFadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+    [data-testid="stAppViewBlockContainer"], .block-container {
+        animation: softFadeIn 400ms ease-out forwards;
+    }
 </style>
 """, unsafe_allow_html=True)
 

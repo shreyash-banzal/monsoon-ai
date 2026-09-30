@@ -19,7 +19,7 @@ from utils.llm_explainer import explain_forecast_adjustment, get_llm_client
 
 st.set_page_config(page_title="What-If Simulator | MONSOON-AI", page_icon="⚡", layout="wide")
 
-from utils.ui import apply_custom_theme, render_sidebar
+from utils.ui import apply_custom_theme, render_sidebar, animated_metric, svg_spinner
 apply_custom_theme()
 render_sidebar()
 
@@ -207,11 +207,11 @@ with col_res:
     
     pr1, pr2, pr3 = st.columns(3)
     with pr1:
-        st.metric("P(Rain ≥ 64.5 mm)", f"{probs['prob_heavy_64_5']*100:.1f}%", "Heavy Rain")
+        animated_metric("P(Rain ≥ 64.5 mm)", probs['prob_heavy_64_5']*100, suffix="%", delta="Heavy Rain")
     with pr2:
-        st.metric("P(Rain ≥ 115.6 mm)", f"{probs['prob_very_heavy_115_6']*100:.1f}%", "Very Heavy")
+        animated_metric("P(Rain ≥ 115.6 mm)", probs['prob_very_heavy_115_6']*100, suffix="%", delta="Very Heavy")
     with pr3:
-        st.metric("P(Rain ≥ 204.5 mm)", f"{probs['prob_extremely_heavy_204_5']*100:.1f}%", "Extremely Heavy")
+        animated_metric("P(Rain ≥ 204.5 mm)", probs['prob_extremely_heavy_204_5']*100, suffix="%", delta="Extremely Heavy")
 
     # Bar visualization
     fig_b = go.Figure()
@@ -235,23 +235,27 @@ st.markdown("---")
 
 # LLM Explanation Section
 st.subheader("🧠 Synoptic Physical Rationale (AI Explainer)")
-with st.spinner("Consulting Meteorological LLM Engine..."):
-    explanation = explain_forecast_adjustment(
-        regime_name=selected_regime,
-        raw_nwp=output["raw_nwp"],
-        ai_corrected=output["ai_corrected"],
-        heavy_rain_prob=probs["prob_heavy_64_5"],
-        district_or_region=location_input,
-        features={
-            "u850": u850_input,
-            "rh700": rh700_input,
-            "mslp_grad": mslp_input
-        },
-        groq_key=st.session_state.get("groq_key", "")
-    )
 
-st.markdown(f"""
-<div style="background: #111B2E; border-left: 4px solid #38BDF8; padding: 18px 22px; border-radius: 8px;">
-    {explanation}
-</div>
-""", unsafe_allow_html=True)
+if run_sim:
+    with svg_spinner(root_dir / "animations" / "loading.svg", "Consulting Meteorological LLM Engine..."):
+        explanation = explain_forecast_adjustment(
+            regime_name=selected_regime,
+            raw_nwp=output["raw_nwp"],
+            ai_corrected=output["ai_corrected"],
+            heavy_rain_prob=probs["prob_heavy_64_5"],
+            district_or_region=location_input,
+            features={
+                "u850": u850_input,
+                "rh700": rh700_input,
+                "mslp_grad": mslp_input
+            },
+            groq_key=st.session_state.get("groq_key", "")
+        )
+
+    st.markdown(f"""
+    <div style="background: #111B2E; border-left: 4px solid #38BDF8; padding: 18px 22px; border-radius: 8px;">
+        {explanation}
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    st.info("Click 'Run AI Correction' to fetch the atmospheric rationale from the LLM.")

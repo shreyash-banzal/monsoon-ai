@@ -18,7 +18,7 @@ from utils.map_utils import generate_monsoon_district_dataset
 
 st.set_page_config(page_title="Heavy Rainfall Alerts | MONSOON-AI", page_icon="🚨", layout="wide")
 
-from utils.ui import apply_custom_theme, render_sidebar
+from utils.ui import apply_custom_theme, render_sidebar, animated_metric
 apply_custom_theme()
 render_sidebar()
 
@@ -55,7 +55,7 @@ with col_sel1:
         index=0
     )
 with col_sel2:
-    st.metric("Advisory Valid Period", "Next 24 Hours", "Updated Realtime")
+    animated_metric("Advisory Valid Period", "Next 24 Hours", delta="Updated Realtime")
 
 df = generate_monsoon_district_dataset(active_regime)
 

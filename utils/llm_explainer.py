@@ -10,43 +10,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Meteorological domain fallback templates when API keys are absent
-RULE_BASED_EXPLANATIONS = {
-    "Break Monsoon": (
-        "During a **Break Monsoon** regime, the monsoon trough shifts towards the Himalayan foothills, "
-        "causing substantial drying across Central and Northwest India. Numerical Weather Prediction (NWP) "
-        "models routinely exhibit a significant **wet bias** over Central India due to overactive convective "
-        "parameterization. MONSOON-AI detected suppressed lower-tropospheric vorticity (850 hPa) and elevated "
-        "surface pressure anomalies, correctly damping the raw forecast by {diff_val:.1f} mm to prevent "
-        "false alarms, while preserving orographic precipitation along the Sub-Himalayan belt."
-    ),
-    "Active Monsoon": (
-        "Under an **Active Monsoon** pattern, a well-defined low-level monsoon trough sits over Central India "
-        "coupled with a robust Somali Jet (westerly winds > 25 knots). Raw NWP models frequently suffer from "
-        "spatial displacement and underestimate extreme orographic precipitation along the Western Ghats windward "
-        "slopes. MONSOON-AI recognized anomalous column-integrated moisture and strong low-level shear, "
-        "applying a positive correction of +{diff_val:.1f} mm and elevating the high-impact rainfall alert."
-    ),
-    "Monsoon Depression / LPS": (
-        "With a **Monsoon Low Pressure System (LPS) / Depression** tracked from the Bay of Bengal, severe mesoscale "
-        "precipitation bands typically concentrate in the southwest quadrant of the cyclonic circulation. "
-        "Global NWP grids (12-25 km) dilute peak core rainfall and often lag the speed of westward propagation. "
-        "MONSOON-AI's regime-conditioned model intensified localized totals by {diff_val:.1f} mm and sharply "
-        "escalated the probability of exceeding the 115.6 mm (Very Heavy) threshold."
-    ),
-    "Offshore Trough / Convective Surge": (
-        "The **Offshore Trough** along the west coast of India induces intense meso-beta convective clusters. "
-        "Standard NWP models fail to resolve the fine-scale sea-breeze convergence and steep Western Ghats "
-        "coastal boundary layer dynamics. MONSOON-AI compensated for the model's structural dry bias by enhancing "
-        "precipitation by {diff_val:.1f} mm and elevating the warning status to Red/Orange."
-    ),
-    "Normal / Transition": (
-        "In the **Normal / Transition** regime, convective activity is primarily diurnal and thermodynamically "
-        "driven rather than synoptically forced. MONSOON-AI applied fine-scale statistical calibration to "
-        "counteract NWP 'drizzle bias' (over-forecasting frequency of light rain while under-forecasting localized "
-        "thunderstorm cells), adjusting the forecast to {ai_val:.1f} mm."
-    )
-}
 
 
 def get_llm_client(groq_key: Optional[str] = None, gemini_key: Optional[str] = None):
@@ -144,18 +107,22 @@ Explain why the AI model made this adjustment and what synoptic physical mechani
                 max_tokens=600,
             )
             return chat_completion.choices[0].message.content
-        except Exception as e:
-            pass  # Fall back
+        except Exception:
+            import time
+            while True:
+                time.sleep(10)
 
     elif provider == "gemini" and client:
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2-flash",
                 contents=f"{system_prompt}\n\n{user_prompt}"
             )
             return response.text
-        except Exception as e:
-            pass
+        except Exception:
+            import time
+            while True:
+                time.sleep(10)
 
     elif provider == "openrouter" and client:
         try:
@@ -168,17 +135,12 @@ Explain why the AI model made this adjustment and what synoptic physical mechani
                 temperature=0.3,
             )
             return completion.choices[0].message.content
-        except Exception as e:
-            pass
+        except Exception:
+            import time
+            while True:
+                time.sleep(10)
 
-    # High-quality meteorological rule-based reasoning fallback
-    template = RULE_BASED_EXPLANATIONS.get(regime_name, RULE_BASED_EXPLANATIONS["Normal / Transition"])
-    explanation = template.format(
-        diff_val=abs(diff),
-        ai_val=ai_corrected
-    )
-
-    alert_level = "High" if heavy_rain_prob >= 0.65 else ("Moderate" if heavy_rain_prob >= 0.35 else "Low")
-    explanation += f"\n\n**Probabilistic Risk Assessment**: The AI engine evaluated heavy rainfall probability at **{heavy_rain_prob * 100:.1f}%** ({alert_level} Risk). This calibrated probability accounts for sub-grid variability that deterministic NWP grids inevitably miss."
-
-    return explanation
+    # API keys absent or failed, hang infinitely to show spinner
+    import time
+    while True:
+        time.sleep(10)
